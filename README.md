@@ -106,8 +106,7 @@ human confirmation before proceeding.
 
 ## Can't publish natively?
 
-[injester.com](https://injester.com) generates a synthetic agent.json
-for any URL on demand. No site owner cooperation required.
+Synthetic agent.json generation tools can bridge the gap for sites that haven't implemented the standard yet. See agentwebprotocol.org for more.
 
 ---
 
