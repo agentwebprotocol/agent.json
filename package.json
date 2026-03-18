@@ -1,0 +1,21 @@
+{
+  "name": "agent-json",
+  "version": "0.1.0",
+  "description": "CLI tool to generate and validate agent.json files for the Agent Web Protocol (AWP)",
+  "main": "src/index.js",
+  "bin": {
+    "agent-json": "src/cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "node src/cli.js init --dry-run"
+  },
+  "keywords": ["agent-json", "awp", "agent-web-protocol", "ai-agents", "agentic-web"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentwebprotocol/agent.json"
+  },
+  "homepage": "https://agentwebprotocol.org",
+  "files": ["src/", "README.md", "LICENSE"]
+}

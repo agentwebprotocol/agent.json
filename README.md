@@ -2,6 +2,22 @@
 
 **The file format for declaring website capabilities to AI agents.**
 
+## Quick Start
+
+Generate an agent.json for your project:
+
+```bash
+npx agent-json init
+```
+
+Validate an existing file:
+
+```bash
+npx agent-json validate agent.json
+```
+
+---
+
 Part of the [Agent Web Protocol](https://agentwebprotocol.org) standard. Add an `agent.json` file to your site and AI agents can discover what actions are available, how to authenticate, and how to recover from errors.
 
 ---
