@@ -1,9 +1,8 @@
 # agent.json
 
-The file format at the center of Agent Web Protocol.
+**The file format for declaring website capabilities to AI agents.**
 
-Publish `agent.json` at the root of your domain. Agents discover it 
-automatically and know exactly what they can do on your surface.
+Part of the [Agent Web Protocol](https://agentwebprotocol.org) standard. Add an `agent.json` file to your site and AI agents can discover what actions are available, how to authenticate, and how to recover from errors.
 
 ---
 
