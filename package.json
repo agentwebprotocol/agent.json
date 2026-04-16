@@ -1,6 +1,6 @@
 {
   "name": "agent-json",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CLI tool to generate and validate agent.json files for the Agent Web Protocol (AWP)",
   "main": "src/index.js",
   "bin": {

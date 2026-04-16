@@ -12,24 +12,31 @@ import { validate } from './schema.js';
  * @param {object} opts
  * @param {string} opts.domain - Canonical domain
  * @param {string} opts.intent - One-sentence description
- * @param {string} [opts.awpVersion='0.1'] - Spec version
+ * @param {string} [opts.awpVersion='0.2'] - Spec version
  * @param {string} [opts.authType] - Auth type (none, api_key, oauth2, bearer)
+ * @param {object} [opts.protocols] - Sibling agent protocols (a2a, mcp, x402, ...) keyed by id
  * @param {Array<object>} [opts.actions=[]] - Array of action objects
  * @returns {object} A valid agent.json object
  */
 export function generate({
   domain,
   intent,
-  awpVersion = '0.1',
+  awpVersion = '0.2',
   authType,
+  protocols,
   actions = []
 } = {}) {
   const result = {
     awp_version: awpVersion,
     domain: domain || 'example.com',
-    intent: intent || 'Describe your service here',
-    actions
+    intent: intent || 'Describe your service here'
   };
+
+  if (protocols && Object.keys(protocols).length > 0) {
+    result.protocols = protocols;
+  }
+
+  result.actions = actions;
 
   if (authType && authType !== 'none') {
     result.auth = { type: authType };

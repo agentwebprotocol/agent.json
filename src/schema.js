@@ -5,11 +5,17 @@
 
 const REQUIRED_TOP_LEVEL = ['awp_version', 'domain', 'intent', 'actions'];
 
-const REQUIRED_ACTION_FIELDS = ['id', 'method', 'endpoint'];
+const REQUIRED_ACTION_FIELDS = ['id'];
 
 const VALID_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
 const VALID_AUTH_TYPES = ['none', 'api_key', 'oauth2', 'bearer'];
+
+// Informative — not enforced. Surfaces MAY declare additional protocols.
+const KNOWN_PROTOCOLS = [
+  'a2a', 'mcp', 'acp', 'ap2', 'x402', 'skyfire',
+  'openapi', 'graphql', 'payment'
+];
 
 /**
  * Validate an agent.json object.
@@ -70,6 +76,13 @@ export function validate(data) {
           }
         }
 
+        // v0.2: action MUST have either (method + endpoint) OR via
+        const hasHttp = 'method' in action && 'endpoint' in action;
+        const hasVia = 'via' in action;
+        if (!hasHttp && !hasVia) {
+          errors.push(`${prefix}: must specify either ("method" + "endpoint") or "via" (referencing a declared protocol)`);
+        }
+
         if ('id' in action) {
           if (typeof action.id !== 'string') {
             errors.push(`${prefix}: "id" must be a string`);
@@ -99,7 +112,51 @@ export function validate(data) {
         if ('auth_required' in action && typeof action.auth_required !== 'boolean') {
           errors.push(`${prefix}: "auth_required" must be a boolean`);
         }
+
+        if ('via' in action) {
+          if (typeof action.via !== 'string') {
+            errors.push(`${prefix}: "via" must be a string`);
+          } else if (data.protocols && !(action.via in data.protocols)) {
+            errors.push(`${prefix}: "via" references undeclared protocol "${action.via}" — add it to top-level "protocols"`);
+          } else if (!data.protocols) {
+            errors.push(`${prefix}: "via" set but no top-level "protocols" object declared`);
+          }
+        }
+
+        if ('operation' in action && typeof action.operation !== 'string') {
+          errors.push(`${prefix}: "operation" must be a string`);
+        }
       });
+    }
+  }
+
+  // Validate protocols if present (v0.2+)
+  if ('protocols' in data && data.protocols !== null) {
+    if (typeof data.protocols !== 'object' || Array.isArray(data.protocols)) {
+      errors.push('"protocols" must be an object keyed by protocol identifier');
+    } else {
+      for (const [id, proto] of Object.entries(data.protocols)) {
+        const prefix = `protocols.${id}`;
+
+        if (typeof proto !== 'object' || proto === null || Array.isArray(proto)) {
+          errors.push(`${prefix}: must be an object`);
+          continue;
+        }
+
+        if (!('version' in proto)) {
+          errors.push(`${prefix}: missing required field "version"`);
+        } else if (typeof proto.version !== 'string') {
+          errors.push(`${prefix}: "version" must be a string`);
+        }
+
+        if ('endpoint' in proto && typeof proto.endpoint !== 'string') {
+          errors.push(`${prefix}: "endpoint" must be a string`);
+        }
+
+        if (!KNOWN_PROTOCOLS.includes(id) && !id.startsWith('x-')) {
+          warnings.push(`${prefix}: unrecognized protocol identifier — use a known id (${KNOWN_PROTOCOLS.join(', ')}) or prefix custom protocols with "x-"`);
+        }
+      }
     }
   }
 
@@ -128,4 +185,4 @@ export function validate(data) {
   };
 }
 
-export { REQUIRED_TOP_LEVEL, REQUIRED_ACTION_FIELDS, VALID_METHODS, VALID_AUTH_TYPES };
+export { REQUIRED_TOP_LEVEL, REQUIRED_ACTION_FIELDS, VALID_METHODS, VALID_AUTH_TYPES, KNOWN_PROTOCOLS };
