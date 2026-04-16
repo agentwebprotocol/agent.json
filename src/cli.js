@@ -112,15 +112,33 @@ async function interactiveInit() {
 
 // ── validate ─────────────────────────────────────────────────────────
 
-function validateFile(filePath) {
-  const resolved = resolve(filePath);
+async function validateFile(pathOrUrl) {
+  const isUrl = /^https?:\/\//i.test(pathOrUrl);
+  const source = isUrl ? pathOrUrl : resolve(pathOrUrl);
 
   let raw;
-  try {
-    raw = readFileSync(resolved, 'utf8');
-  } catch (err) {
-    console.error(red(`Cannot read file: ${resolved}`));
-    process.exit(1);
+  if (isUrl) {
+    try {
+      const res = await fetch(pathOrUrl, {
+        headers: { Accept: 'application/json' },
+        redirect: 'follow',
+      });
+      if (!res.ok) {
+        console.error(red(`Cannot fetch ${pathOrUrl}: HTTP ${res.status}`));
+        process.exit(1);
+      }
+      raw = await res.text();
+    } catch (err) {
+      console.error(red(`Cannot fetch ${pathOrUrl}: ${err.message}`));
+      process.exit(1);
+    }
+  } else {
+    try {
+      raw = readFileSync(source, 'utf8');
+    } catch (err) {
+      console.error(red(`Cannot read file: ${source}`));
+      process.exit(1);
+    }
   }
 
   let data;
@@ -133,7 +151,7 @@ function validateFile(filePath) {
 
   const result = validate(data);
 
-  console.log(bold(`\nValidating: ${resolved}\n`));
+  console.log(bold(`\nValidating: ${source}\n`));
 
   if (result.errors.length === 0 && result.warnings.length === 0) {
     console.log(green('  \u2713 Valid agent.json — no issues found.\n'));
@@ -185,7 +203,7 @@ ${bold('agent-json')} — CLI for the Agent Web Protocol
 ${bold('Usage:')}
   agent-json init              Generate an agent.json interactively
   agent-json init --dry-run    Print a sample agent.json to stdout
-  agent-json validate <file>   Validate an agent.json file
+  agent-json validate <file-or-url>  Validate an agent.json file or remote URL
 
 ${dim('https://agentwebprotocol.org')}
 `);
